@@ -36,10 +36,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 let db;
 
 if (process.env.ENV === 'Test') {
-  db = mongoose.connect('mongodb://localhost/SimpleAutomationAPI_Test');
+  db = mongoose.connect('mongodb://localhost/SimpleAutomationAPI_Test')
+    .then(() => console.log('Now connected to MongoDB!'))
+    .catch(err => console.error('Something went wrong', err));
 } else {
-  db = mongoose.connect('mongodb://localhost/SimpleAutomationAPI');
+  db = mongoose.connect('mongodb://localhost/SimpleAutomationAPI')
+    .then(() => console.log('Now connected to MongoDB!'))
+    .catch(err => console.error('Something went wrong', err));
 }
+
+const Suite = require('./models/suiteModel');
+const suiteRouter = require('./routes/suiteRoutes')(Suite);
+
+app.use('/api/Suites', suiteRouter);
+
 
 const Test = require('./models/testModel');
 const testRouter = require('./routes/testRoutes')(Test);

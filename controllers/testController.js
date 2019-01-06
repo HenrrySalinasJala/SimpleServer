@@ -1,33 +1,42 @@
-var testController = function (Test) {
-    var post = function (req, res) {
-        var test = new Test(req.body);
-        if(!req.body.title){
-            res.status(400);
-            res.send('Title is required');
+const testController = (Test) => {
+  const post = (req, res) => {
+    const test = new Test(req.body);
+    if (!req.body.title) {
+      res.status(400);
+      res.send('Title is required');
+    } else if (!req.body.fullName) {
+      res.status(400);
+      res.send('Full Name is required');
+    } else {
+      test.save((err) => {
+        if (err) {
+          res.status(500).send(err);
+        } else {
+          res.status(201);
+          res.json(test);
         }
-        test.save();
-        res.status(201);
-        res.send(test);
+      });
     }
+  };
 
-    var get = function (req, res) {
-        var query = {};
-        if (req.query.title) {
-            query.title = req.query.title
-        }
-        Test.find(query, function (err, Tests) {
-            if (err) {
-                res.status(500).send(err);
-            } else {
-                res.json(Tests);
-            }
-        });
+  const get = (req, res) => {
+    const query = {};
+    if (req.query.title) {
+      query.title = req.query.title;
     }
+    Test.find(query, (err, Tests) => {
+      if (err) {
+        res.status(500).send(err);
+      } else {
+        res.json(Tests);
+      }
+    });
+  };
 
-    return {
-        post: post,
-        get: get
-    }
+  return {
+    post,
+    get,
+  };
 }
 
 module.exports = testController;

@@ -1,13 +1,42 @@
 const mongoose = require('mongoose');
+
 const Schema = mongoose.Schema;
 
-var testModel = new Schema({
-    title: {
-        type: String
+const testModel = new Schema({
+  testId: {
+    type: String,
+  },
+  parentId: {
+    type: String,
+  },
+  fullName: {
+    type: String,
+  },
+  title: {
+    type: String,
+  },
+  tags: [{
+    type: String,
+  }],
+  result: { type: String },
+  output: { type: String },
+  stackTrace: { type: String },
+  steps: [{
+    keyword: String,
+    text: String,
+    arguments: String,
+    state: String,
+    duration: String,
+  }],
+  suite: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Suite',
+  },
+}, {
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     },
-    status: { type: String },
-    executed: { type: Boolean}
-
-});
+  });
 
 module.exports = mongoose.model('Test', testModel);
