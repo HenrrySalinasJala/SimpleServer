@@ -23,7 +23,7 @@ const testController = (Test) => {
     const query = {};
     if (req.query.title) {
       query.title = req.query.title;
-    }
+    } 
     Test.find(query, (err, Tests) => {
       if (err) {
         res.status(500).send(err);

@@ -45,6 +45,11 @@ if (process.env.ENV === 'Test') {
     .catch(err => console.error('Something went wrong', err));
 }
 
+const TestRun = require('./models/testRunModel');
+const testRunRouter = require('./routes/testRunRoutes')(TestRun);
+
+app.use('/api/TestRun', testRunRouter);
+
 const Suite = require('./models/suiteModel');
 const suiteRouter = require('./routes/suiteRoutes')(Suite);
 
@@ -55,7 +60,6 @@ const Test = require('./models/testModel');
 const testRouter = require('./routes/testRoutes')(Test);
 
 app.use('/api/Tests', testRouter);
-
 
 // error handling middleware should be loaded after the loading the routes
 if (app.get('env') === 'development') {

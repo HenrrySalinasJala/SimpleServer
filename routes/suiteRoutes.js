@@ -8,8 +8,9 @@ const routes = (Suite) => {
     .get(testController.get);
   // middleware
   suiteRouter.use('/:suiteId', (req, res, next) => {
-    const suiteId = req.params.suiteId;
-    Suite.findById(suiteId, (err, suite) => {
+    const { suiteId } = req.params;
+
+    Suite.findOne({ suiteId }, (err, suite) => {
       if (err) {
         res.status(500).send(err);
       } else if (suite) {
@@ -23,7 +24,13 @@ const routes = (Suite) => {
 
   suiteRouter.route('/:suiteId')
     .get((req, res) => {
-      res.json(req.suite);
+      req.suite.populate('testRun', (err, populatedSuite) => {
+        if (err) {
+          res.status(500).send(err);
+        } else {
+          res.json(populatedSuite);
+        }
+      });
     })
     .put((req, res) => {
       const name = req.body.name;
@@ -43,10 +50,16 @@ const routes = (Suite) => {
     .patch((req, res) => {
       if (req.body._id) {
         delete req.body._id;
+      } else if (req.body.suiteId) {
+        delete req.body.suiteId;
+      } else if (req.body.runId) {
+        delete req.body.runId;
       }
-      for (const p in req.body) {
-        req.suite[p] = req.body[p];
-      }
+
+      Object.keys(req.body).forEach((key) => {
+        req.suite[key] = req.body[key];
+      });
+
       req.suite.save((err) => {
         if (err) {
           res.status(500).send(err);

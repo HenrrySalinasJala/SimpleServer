@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const testRunModel = new Schema({
+  runId: {
+    type: String,
+  },
   executionDate: {
     type: Date,
     default: Date.now,
@@ -14,4 +17,4 @@ const testRunModel = new Schema({
     }
   });
 
-module.exports = mongoose.model('testRun', testRunModel);
+module.exports = mongoose.model('TestRun', testRunModel);

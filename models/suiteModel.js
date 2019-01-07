@@ -12,6 +12,13 @@ const suiteModel = new Schema({
   runId: {
     type: String,
   },
+  suiteId: {
+    type: String,
+  },
+  testRun: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'TestRun',
+  },
 }, {
     timestamps: {
       createdAt: 'created_at',

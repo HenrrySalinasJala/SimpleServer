@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const Schema = mongoose.Schema;
 
 const testModel = new Schema({
@@ -38,5 +37,6 @@ const testModel = new Schema({
       updatedAt: 'updated_at',
     },
   });
+
 
 module.exports = mongoose.model('Test', testModel);
