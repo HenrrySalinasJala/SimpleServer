@@ -8,6 +8,7 @@ const favicon = require('serve-favicon');
 const logger = require('morgan');
 const methodOverride = require('method-override');
 const session = require('express-session');
+const expressValidator = require('express-validator')
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const errorHandler = require('errorhandler');
@@ -32,6 +33,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(multer());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(expressValidator())
 
 let db;
 

@@ -1,3 +1,4 @@
+const { validationResult } = require('express-validator/check');
 const express = require('express');
 const Suite = require('../models/suiteModel');
 const TestRun = require('../models/testRunModel');
@@ -7,27 +8,41 @@ const routes = (Test) => {
   const testController = require('../controllers/testController')(Test);
 
   testRouter.post('/', (req, res, next) => {
-    const { suite } = req.body;
-    const { suiteId } = suite;
-    const { runId } = suite;
-    // delete suite.suiteId;
-    // delete suite.suiteId;
-    delete req.body.suite;
-    TestRun.findOneAndUpdate({ runId }, { runId }, { new: true, upsert: true, setDefaultsOnInsert: true }, (errorTestRun, resultTestRun) => {
-      if (errorTestRun) {
-        res.status(500).send(errorTestRun);
-      } else {
-        suite.testRun = `${resultTestRun._id}`;
-        Suite.findOneAndUpdate({ suiteId }, suite, { new: true, upsert: true, setDefaultsOnInsert: true }, (err, resultSuite) => {
-          if (err) {
-            res.status(500).send(err);
-          } else {
-            req.body.suite = `${resultSuite._id}`;
-            next();
-          }
-        });
-      }
-    });
+    if (!req.body.suite) {
+      res.status(400);
+      res.send('Suite information is required');
+    } else if (!req.body.suite.runId) {
+      res.status(400);
+      res.send('Run Id is required');
+    } else if (!req.body.suite.suiteId) {
+      res.status(400);
+      res.send('Suite Id is required');
+    } else if (!req.body.testId) {
+      res.status(400);
+      res.send('Test Id is required');
+    } else {
+      const { suite } = req.body;
+      const { suiteId } = suite;
+      const { runId } = suite;
+      delete req.body.suite;
+      const testRunFindOptions = { new: true, upsert: true, setDefaultsOnInsert: true };
+      TestRun.findOneAndUpdate({ runId }, { runId }, testRunFindOptions, (errorTestRun, resultTestRun) => {
+        if (errorTestRun) {
+          res.status(500).send(errorTestRun);
+        } else {
+          suite.testRun = `${resultTestRun._id}`;
+          const suiteFindOptions = { new: true, upsert: true, setDefaultsOnInsert: true };
+          Suite.findOneAndUpdate({ suiteId }, suite, suiteFindOptions, (err, resultSuite) => {
+            if (err) {
+              res.status(500).send(err);
+            } else {
+              req.body.suite = `${resultSuite._id}`;
+              next();
+            }
+          });
+        }
+      });
+    }
   });
 
   testRouter.route('/')
@@ -35,8 +50,8 @@ const routes = (Test) => {
     .get(testController.get);
 
   testRouter.use('/:testId', (req, res, next) => {
-    const fullName = req.params.testId;
-    Test.findOne({ fullName }, (err, test) => {
+    const testId = req.params.testId;
+    Test.findOne({ testId }, (err, test) => {
       if (err) {
         res.status(500).send(err);
       } else if (test) {
@@ -58,13 +73,23 @@ const routes = (Test) => {
         }
       });
     })
-    .put((req, res) => {
-      const title = req.body.title;
-      const status = req.body.status;
-      const executed = req.body.executed;
+    .put(testController.validate('updateTest'), (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+      const { title, steps, result,
+        tags, stack, errorMessage,
+        duration, screenshot } = req.body;
+
       req.test.title = title;
-      req.test.status = status;
-      req.test.executed = executed;
+      req.test.steps = steps;
+      req.test.tags = tags;
+      req.test.result = result;
+      req.test.stackTrace = stack;
+      req.test.output = errorMessage;
+      req.test.duration = duration;
+      req.test.screenshot = screenshot;
       req.test.save((err) => {
         if (err) {
           res.status(500).send(err);
@@ -72,7 +97,6 @@ const routes = (Test) => {
           res.json(req.test);
         }
       });
-      // res.json(req.test);
     })
     .patch((req, res) => {
       if (req.body._id) {
@@ -81,9 +105,6 @@ const routes = (Test) => {
       Object.keys(req.body).forEach((key) => {
         req.test[key] = req.body[key];
       });
-      // for (const p in req.body) {
-      //   req.test[p] = req.body[p];
-      // }
       req.test.save((err) => {
         if (err) {
           res.status(500).send(err);

@@ -1,3 +1,5 @@
+const { check } = require('express-validator/check')
+
 const testController = (Test) => {
   const post = (req, res) => {
     const test = new Test(req.body);
@@ -23,7 +25,7 @@ const testController = (Test) => {
     const query = {};
     if (req.query.title) {
       query.title = req.query.title;
-    } 
+    }
     Test.find(query, (err, Tests) => {
       if (err) {
         res.status(500).send(err);
@@ -33,10 +35,40 @@ const testController = (Test) => {
     });
   };
 
+  const validate = (method) => {
+    switch (method) {
+      case 'updateTest': {
+        return [
+          check('suite', 'suite doesn\'t exists').exists(),
+          
+          check('fullName', 'fullname doesn\'t exists').exists(),
+
+          check('title', 'test title doesn\'t exists').exists(),
+
+          check('result', 'result doesn\'t exists').exists(),
+
+          check('stack', 'stackTrace doesn\'t exists').exists(),
+
+          check('errorMessage', 'error message doesn\'t exists').exists(),
+          
+          check('duration', 'duration doesn\'t exists').exists(),
+
+          check('screenshot', 'screenshot doesn\'t exists').exists(),
+
+          check('steps', 'steps doesn\'t exists').exists(),
+
+          check('tags', 'tags doesn\'t exists').exists(),
+          
+        ]
+      }
+    }
+  };
+
   return {
     post,
     get,
+    validate,
   };
-}
+};
 
 module.exports = testController;
